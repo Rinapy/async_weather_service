@@ -1,1 +1,98 @@
-<h1>ОКЕЙ</h1>
+  <!DOCTYPE html>
+<html>
+<head>
+  <title>Температура</title>
+  <style>
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      border: 1px solid black;
+      padding: 10px;
+      margin: 10px;
+      width: 200px;
+      text-align: center;
+    }
+  </style>
+</head>
+  <body>
+    {% for city in cities %}
+      <div class="box" data-city={{ city }}>
+      </div>
+    {% endfor %}
+    <script>
+      // Функция для отправки AJAX-запроса на сервер и получения данных о погоде
+      function getWeatherData() {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "http://localhost:8080/integer", true);
+
+        xhr.onload = function () {
+          if (xhr.status >= 200 && xhr.status < 400) {
+            var response = JSON.parse(xhr.responseText);
+            // Обработка полученных данных
+            handleWeatherData(response);
+          } else {
+            console.error("Ошибка загрузки данных");
+          }
+        };
+
+        xhr.onerror = function () {
+          console.error("Ошибка сети");
+        };
+
+        xhr.send();
+      }
+
+      // Функция для обновления температуры каждую минуту
+      function updateTemperature(data) {
+        setInterval(function () {
+          // Обновление температуры для каждого города
+          for (var city in data) {
+            var temperatures = data[city].temperature;
+            var currentTemperature = temperatures.shift();
+
+            if (currentTemperature === undefined) {
+              // Если показатели закончились, обновляем страницу
+              location.reload();
+              return;
+            }
+
+            var element = document.querySelector('[data-city="' + city + '"]');
+            element.textContent =
+              "Текущая погода в " + city + ": " + currentTemperature;
+          }
+        }, 10000); // Интервал обновления (в миллисекундах)
+      }
+
+      // Функция для обработки полученных данных о погоде при загрузке страницы
+      function handleWeatherData(data) {
+        // Дальнейшая обработка данных, например, обновление блоков на странице
+
+        // Пример: обновление температуры для каждого города при загрузке страницы
+        for (var city in data) {
+          var temperatures = data[city].temperature;
+          var currentTemperature = temperatures.shift();
+
+          if (currentTemperature === undefined) {
+            // Если показатели закончились, обновляем страницу
+            location.reload();
+            return;
+          }
+
+          var element = document.querySelector('[data-city="' + city + '"]');
+          element.textContent = "Текущая погода в " + city + ": " + currentTemperature;
+        }
+
+        // Запускаем обновление температуры каждую минуту
+        updateTemperature(data);
+      }
+
+      // Вызываем функцию для загрузки данных о погоде при загрузке страницы
+      window.onload = getWeatherData;
+    </script>
+  </body>
+</html>

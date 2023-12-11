@@ -13,3 +13,6 @@ EXAMPLE_DICT = {
   'Moscow': '55.7522,37.6156',
   '...': '...'
 }
+EXAMPLE_RESPONSE_JSON = {
+  'Moscow': (37.)
+}
